@@ -113,6 +113,16 @@ public class UserController {
 			new LikeController().deleteLike(l.getEntityId());
 		}
 
+		// Delete friend requests
+		List<FriendRequest> madeRequests = new FriendRequestFacade().findAllFromRequester(id);
+		for (FriendRequest r : madeRequests) {
+			new FriendRequestController().deleteFriendRequest(r.getEntityId());
+		}
+		List<FriendRequest> receivedRequests = getFriendRequests(id).getBody();
+		for (FriendRequest r : receivedRequests) {
+			new FriendRequestController().deleteFriendRequest(r.getEntityId());
+		}
+
 		// Delete user
 		new UserFacade().delete(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);

@@ -18,6 +18,12 @@ public class FriendRequestFacade extends AbstractFacade<FriendRequest> {
 		return findAllFromQuery("FROM FriendRequest WHERE targetUserId = :userId", parameters);
 	}
 
+	public List<FriendRequest> findAllFromRequester(long userId) {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("userId", userId);
+		return findAllFromQuery("FROM FriendRequest WHERE requesterUserId = :userId", parameters);
+	}
+
 	public boolean requestExists(long targetId, long requesterId) {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("targetId", targetId);
