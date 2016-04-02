@@ -37,6 +37,11 @@ public class FriendRequestController {
 			return new ResponseEntity<Object>(new MissingFieldsError(missingFields), HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 
+		// Check that the target and requester are not the same
+		else if (request.getTargetUserId() == request.getRequesterUserId()) {
+			return new ResponseEntity<Object>(new ErrorMessage("Target and requester id cannot be the same"), HttpStatus.CONFLICT);
+		}
+
 		// Check that target exists
 		else if (((ResponseEntity<Object>) new UserController().getUser(request.getTargetUserId())).getStatusCode() == HttpStatus.NOT_FOUND) {
 			return new ResponseEntity<Object>(new ErrorMessage("No user with id " + request.getTargetUserId() + " found"), HttpStatus.UNPROCESSABLE_ENTITY);
@@ -49,9 +54,16 @@ public class FriendRequestController {
 
 		// Create request
 		else {
-			request = new FriendRequestFacade().create(request);
-			request.add(createLinks(request));
-			return new ResponseEntity<Object>(request, HttpStatus.CREATED);
+			// Check that the request doesn't already exist
+			boolean exists = new FriendRequestFacade().requestExists(request.getTargetUserId(), request.getRequesterUserId());
+			if (exists) {
+				return new ResponseEntity<Object>(new ErrorMessage("That request already exists"), HttpStatus.CONFLICT);
+			}
+			else {
+				request = new FriendRequestFacade().create(request);
+				request.add(createLinks(request));
+				return new ResponseEntity<Object>(request, HttpStatus.CREATED);
+			}
 		}
 	}
 
