@@ -100,7 +100,7 @@ public class PostController {
 	public HttpEntity<Object> createLike(@PathVariable long id, @RequestBody Like like) {
 		List<String> missingFields = new ArrayList<String>();
 		if (like.getUserId() == 0) missingFields.add("userId");
-		if (like.getCommentId() == 0) missingFields.add("postId");
+		if (like.getPostId() == 0) missingFields.add("postId");
 
 		// Check missing fields
 		if (missingFields.size() > 0) {
