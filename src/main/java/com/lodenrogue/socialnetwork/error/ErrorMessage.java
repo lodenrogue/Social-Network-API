@@ -1,9 +1,9 @@
-package com.lodenrogue.socialnetwork.rest;
+package com.lodenrogue.socialnetwork.error;
 
-public class Error {
+public class ErrorMessage {
 	private String message;
 
-	public Error(String message) {
+	public ErrorMessage(String message) {
 		this.message = message;
 	}
 

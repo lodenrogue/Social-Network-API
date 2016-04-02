@@ -1,4 +1,4 @@
-package com.lodenrogue.socialnetwork.rest;
+package com.lodenrogue.socialnetwork.error;
 
 import java.util.List;
 

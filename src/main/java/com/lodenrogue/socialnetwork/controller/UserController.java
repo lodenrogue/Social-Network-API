@@ -15,34 +15,36 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lodenrogue.socialnetwork.error.ErrorMessage;
+import com.lodenrogue.socialnetwork.error.MissingFieldsError;
 import com.lodenrogue.socialnetwork.model.Comment;
 import com.lodenrogue.socialnetwork.model.Post;
 import com.lodenrogue.socialnetwork.model.User;
-import com.lodenrogue.socialnetwork.rest.MissingFieldsError;
 import com.lodenrogue.socialnetwork.service.CommentFacade;
 import com.lodenrogue.socialnetwork.service.PostFacade;
 import com.lodenrogue.socialnetwork.service.UserFacade;
 
 @RestController
+@RequestMapping(path = "/api/v1")
 public class UserController {
 
-	@RequestMapping(path = "/api/v1/users/{id}", method = RequestMethod.GET)
+	@RequestMapping(path = "/users/{id}", method = RequestMethod.GET)
 	public HttpEntity<Object> getUser(@PathVariable long id) {
 		// Find the user
 		User user = new UserFacade().find(id);
 		if (user == null) {
-			return new ResponseEntity<Object>(new Error("No user with id " + id + " found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<Object>(new ErrorMessage("No user with id " + id + " found"), HttpStatus.NOT_FOUND);
 		}
 		else {
 			user.add(linkTo(methodOn(UserController.class).getUser(id)).withSelfRel());
-			if (getPostsByUser(id).getBody().size() > 0) {
-				user.add(linkTo(methodOn(UserController.class).getPostsByUser(id)).withRel("posts"));
+			if (getPosts(id).getBody().size() > 0) {
+				user.add(linkTo(methodOn(UserController.class).getPosts(id)).withRel("posts"));
 			}
 			return new ResponseEntity<Object>(user, HttpStatus.OK);
 		}
 	}
 
-	@RequestMapping(path = "/api/v1/users", method = RequestMethod.POST)
+	@RequestMapping(path = "/users", method = RequestMethod.POST)
 	public HttpEntity<Object> createUser(@RequestBody User user) {
 
 		List<String> missingFields = new ArrayList<String>();
@@ -60,8 +62,8 @@ public class UserController {
 		}
 	}
 
-	@RequestMapping(path = "/api/v1/users/{userId}/posts", method = RequestMethod.GET)
-	public HttpEntity<List<Post>> getPostsByUser(@PathVariable long userId) {
+	@RequestMapping(path = "/users/{userId}/posts", method = RequestMethod.GET)
+	public HttpEntity<List<Post>> getPosts(@PathVariable long userId) {
 		List<Post> posts = new PostFacade().findAllByUser(userId);
 		for (Post p : posts) {
 			p.add(linkTo(methodOn(PostController.class).getPost(p.getEntityId())).withSelfRel());
@@ -70,8 +72,8 @@ public class UserController {
 		return new ResponseEntity<List<Post>>(posts, HttpStatus.OK);
 	}
 
-	@RequestMapping(path = "api/v1/users/{userId}/comments", method = RequestMethod.GET)
-	public HttpEntity<List<Comment>> getCommentsByUser(@PathVariable long userId) {
+	@RequestMapping(path = "/users/{userId}/comments", method = RequestMethod.GET)
+	public HttpEntity<List<Comment>> getComments(@PathVariable long userId) {
 		List<Comment> comments = new CommentFacade().findAllByUser(userId);
 		for (Comment c : comments) {
 			c.add(linkTo(methodOn(CommentController.class).getComment(c.getEntityId())).withSelfRel());
@@ -81,20 +83,20 @@ public class UserController {
 		return new ResponseEntity<List<Comment>>(comments, HttpStatus.OK);
 	}
 
-	@RequestMapping(path = "/api/v1/users/{id}", method = RequestMethod.DELETE)
+	@RequestMapping(path = "/users/{id}", method = RequestMethod.DELETE)
 	public HttpEntity<Object> deleteUser(@PathVariable long id) {
 		// Delete posts
-		List<Post> posts = getPostsByUser(id).getBody();
+		List<Post> posts = getPosts(id).getBody();
 		for (Post p : posts) {
 			new PostController().deletePost(p.getEntityId());
 		}
 
 		// Delete comments
-		List<Comment> comments = getCommentsByUser(id).getBody();
-		for(Comment c : comments){
+		List<Comment> comments = getComments(id).getBody();
+		for (Comment c : comments) {
 			new CommentController().deleteComment(c.getEntityId());
 		}
-		
+
 		// Delete user
 		new UserFacade().delete(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);

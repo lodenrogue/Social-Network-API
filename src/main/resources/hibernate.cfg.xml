@@ -31,7 +31,7 @@
 		<mapping class="com.lodenrogue.socialnetwork.model.Comment" />
 		<!-- <mapping class="com.lodenrogue.socialnetwork.model.FriendRequest" 
 			/> -->
-		<!-- <mapping class="com.lodenrogue.socialnetwork.model.Like" /> -->
+		<mapping class="com.lodenrogue.socialnetwork.model.Like" />
 
 	</session-factory>
 </hibernate-configuration>
