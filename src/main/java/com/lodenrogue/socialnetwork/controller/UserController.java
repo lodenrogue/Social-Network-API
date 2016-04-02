@@ -6,6 +6,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lodenrogue.socialnetwork.error.ErrorMessage;
 import com.lodenrogue.socialnetwork.error.MissingFieldsError;
 import com.lodenrogue.socialnetwork.model.Comment;
+import com.lodenrogue.socialnetwork.model.Like;
 import com.lodenrogue.socialnetwork.model.Post;
 import com.lodenrogue.socialnetwork.model.User;
 import com.lodenrogue.socialnetwork.service.CommentFacade;
+import com.lodenrogue.socialnetwork.service.LikeFacade;
 import com.lodenrogue.socialnetwork.service.PostFacade;
 import com.lodenrogue.socialnetwork.service.UserFacade;
 
@@ -30,16 +33,12 @@ public class UserController {
 
 	@RequestMapping(path = "/users/{id}", method = RequestMethod.GET)
 	public HttpEntity<Object> getUser(@PathVariable long id) {
-		// Find the user
 		User user = new UserFacade().find(id);
 		if (user == null) {
 			return new ResponseEntity<Object>(new ErrorMessage("No user with id " + id + " found"), HttpStatus.NOT_FOUND);
 		}
 		else {
-			user.add(linkTo(methodOn(UserController.class).getUser(id)).withSelfRel());
-			if (getPosts(id).getBody().size() > 0) {
-				user.add(linkTo(methodOn(UserController.class).getPosts(id)).withRel("posts"));
-			}
+			user.add(createLinks(user));
 			return new ResponseEntity<Object>(user, HttpStatus.OK);
 		}
 	}
@@ -56,8 +55,7 @@ public class UserController {
 			return new ResponseEntity<Object>(new MissingFieldsError(missingFields), HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 		else {
-			user = new UserFacade().create(user);
-			user.add(linkTo(methodOn(UserController.class).getUser(user.getEntityId())).withSelfRel());
+			user.add(createLinks(user));
 			return new ResponseEntity<Object>(user, HttpStatus.CREATED);
 		}
 	}
@@ -66,8 +64,7 @@ public class UserController {
 	public HttpEntity<List<Post>> getPosts(@PathVariable long userId) {
 		List<Post> posts = new PostFacade().findAllByUser(userId);
 		for (Post p : posts) {
-			p.add(linkTo(methodOn(PostController.class).getPost(p.getEntityId())).withSelfRel());
-			p.add(linkTo(methodOn(UserController.class).getUser(userId)).withRel("author"));
+			p.add(new PostController().createLinks(p));
 		}
 		return new ResponseEntity<List<Post>>(posts, HttpStatus.OK);
 	}
@@ -76,9 +73,7 @@ public class UserController {
 	public HttpEntity<List<Comment>> getComments(@PathVariable long userId) {
 		List<Comment> comments = new CommentFacade().findAllByUser(userId);
 		for (Comment c : comments) {
-			c.add(linkTo(methodOn(CommentController.class).getComment(c.getEntityId())).withSelfRel());
-			c.add(linkTo(methodOn(UserController.class).getUser(userId)).withRel("author"));
-			c.add(linkTo(methodOn(PostController.class).getPost(c.getPostId())).withRel("post"));
+			c.add(new CommentController().createLinks(c));
 		}
 		return new ResponseEntity<List<Comment>>(comments, HttpStatus.OK);
 	}
@@ -97,8 +92,25 @@ public class UserController {
 			new CommentController().deleteComment(c.getEntityId());
 		}
 
+		// Delete likes
+		List<Like> likes = new LikeFacade().getLikesByUser(id);
+		for (Like l : likes) {
+			new LikeController().deleteLike(l.getEntityId());
+		}
+
 		// Delete user
 		new UserFacade().delete(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+
+	public List<Link> createLinks(User user) {
+		List<Link> links = new ArrayList<Link>();
+		links.add(linkTo(methodOn(UserController.class).getUser(user.getEntityId())).withSelfRel());
+
+		// Add posts link
+		if (getPosts(user.getEntityId()).getBody().size() > 0) {
+			links.add(linkTo(methodOn(UserController.class).getPosts(user.getEntityId())).withRel("posts"));
+		}
+		return links;
 	}
 }

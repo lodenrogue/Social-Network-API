@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +35,7 @@ public class CommentController {
 			return new ResponseEntity<Object>(new ErrorMessage("No comment with id " + id + " found"), HttpStatus.NOT_FOUND);
 		}
 		else {
-			comment.add(linkTo(methodOn(CommentController.class).getComment(id)).withSelfRel());
-			comment.add(linkTo(methodOn(UserController.class).getUser(id)).withRel("author"));
-			comment.add(linkTo(methodOn(PostController.class).getPost(id)).withRel("post"));
+			comment.add(createLinks(comment));
 			return new ResponseEntity<Object>(comment, HttpStatus.OK);
 		}
 	}
@@ -68,15 +67,17 @@ public class CommentController {
 		else {
 			comment.setTimeCreated(Calendar.getInstance());
 			comment = new CommentFacade().create(comment);
-			comment.add(linkTo(methodOn(CommentController.class).getComment(comment.getEntityId())).withSelfRel());
-			comment.add(linkTo(methodOn(UserController.class).getUser(comment.getUserId())).withRel("author"));
-			comment.add(linkTo(methodOn(PostController.class).getPost(comment.getPostId())).withRel("post"));
+			comment.add(createLinks(comment));
 			return new ResponseEntity<Object>(comment, HttpStatus.CREATED);
 		}
 	}
 
 	@RequestMapping(path = "/comments/{id}", method = RequestMethod.DELETE)
 	public HttpEntity<Object> deleteComment(@PathVariable long id) {
+		List<Like> likes = getLikes(id).getBody();
+		for (Like l : likes) {
+			new LikeController().deleteLike(l.getEntityId());
+		}
 		new CommentFacade().delete(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
@@ -105,7 +106,7 @@ public class CommentController {
 		// Create the like
 		else {
 			like = new LikeFacade().create(like);
-			like = new LikeController().createLinks(like);
+			like.add(new LikeController().createLinks(like));
 			return new ResponseEntity<Object>(like, HttpStatus.CREATED);
 		}
 	}
@@ -114,9 +115,22 @@ public class CommentController {
 	public HttpEntity<List<Like>> getLikes(@PathVariable long id) {
 		List<Like> likes = new LikeFacade().getLikesByComment(id);
 		for (Like l : likes) {
-			l = new LikeController().createLinks(l);
+			l.add(new LikeController().createLinks(l));
 		}
 		return new ResponseEntity<List<Like>>(likes, HttpStatus.OK);
+	}
+
+	public List<Link> createLinks(Comment comment) {
+		List<Link> links = new ArrayList<Link>();
+		links.add(linkTo(methodOn(CommentController.class).getComment(comment.getEntityId())).withSelfRel());
+		links.add(linkTo(methodOn(UserController.class).getUser(comment.getUserId())).withRel("author"));
+		links.add(linkTo(methodOn(PostController.class).getPost(comment.getPostId())).withRel("post"));
+
+		if (new CommentController().getLikes(comment.getEntityId()).getBody().size() > 0) {
+			links.add(linkTo(methodOn(CommentController.class).getLikes(comment.getEntityId())).withRel("likes"));
+		}
+
+		return links;
 	}
 
 }
