@@ -19,10 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lodenrogue.socialnetwork.error.ErrorMessage;
 import com.lodenrogue.socialnetwork.error.MissingFieldsError;
 import com.lodenrogue.socialnetwork.model.Comment;
+import com.lodenrogue.socialnetwork.model.FriendRequest;
 import com.lodenrogue.socialnetwork.model.Like;
 import com.lodenrogue.socialnetwork.model.Post;
 import com.lodenrogue.socialnetwork.model.User;
 import com.lodenrogue.socialnetwork.service.CommentFacade;
+import com.lodenrogue.socialnetwork.service.FriendRequestFacade;
 import com.lodenrogue.socialnetwork.service.LikeFacade;
 import com.lodenrogue.socialnetwork.service.PostFacade;
 import com.lodenrogue.socialnetwork.service.UserFacade;
@@ -80,6 +82,15 @@ public class UserController {
 			c.add(new CommentController().createLinks(c));
 		}
 		return new ResponseEntity<List<Comment>>(comments, HttpStatus.OK);
+	}
+
+	@RequestMapping(path = "/users/{userId}/friend-requests", method = RequestMethod.GET)
+	public HttpEntity<List<FriendRequest>> getFriendRequests(@PathVariable long userId) {
+		List<FriendRequest> requests = new FriendRequestFacade().findAllWithTarget(userId);
+		for (FriendRequest r : requests) {
+			r.add(new FriendRequestController().createLinks(r));
+		}
+		return new ResponseEntity<List<FriendRequest>>(requests, HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "/users/{id}", method = RequestMethod.DELETE)
