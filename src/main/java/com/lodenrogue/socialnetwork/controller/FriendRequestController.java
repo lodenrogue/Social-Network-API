@@ -1,15 +1,16 @@
 package com.lodenrogue.socialnetwork.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -54,9 +55,27 @@ public class FriendRequestController {
 		}
 	}
 
+	@RequestMapping(path = "/friend-requests/{id}", method = RequestMethod.GET)
+	public HttpEntity<Object> getFriendRequest(@PathVariable long id) {
+		FriendRequest request = new FriendRequestFacade().find(id);
+		if (request == null) {
+			return new ResponseEntity<Object>(new ErrorMessage("No request with id " + id + " found"), HttpStatus.NOT_FOUND);
+		}
+		else {
+			request.add(createLinks(request));
+			return new ResponseEntity<Object>(request, HttpStatus.OK);
+		}
+	}
+
+	@RequestMapping(path = "/friend-requests/{id}", method = RequestMethod.DELETE)
+	public HttpEntity<Object> deleteFriendRequest(@PathVariable long id) {
+		new FriendRequestFacade().delete(id);
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+
 	public List<Link> createLinks(FriendRequest request) {
 		List<Link> links = new ArrayList<Link>();
-		// links.add(linkTo(methodOn(FriendRequestController.class).getFriendRequest(request.getEntityId())));
+		links.add(linkTo(methodOn(FriendRequestController.class).getFriendRequest(request.getEntityId())).withSelfRel());
 		links.add(linkTo(methodOn(UserController.class).getUser(request.getTargetUserId())).withRel("target"));
 		links.add(linkTo(methodOn(UserController.class).getUser(request.getRequesterUserId())).withRel("requester"));
 		return links;
