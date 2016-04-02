@@ -29,8 +29,7 @@
 		<!-- <mapping class="com.lodenrogue.socialnetwork.model.Friendship" /> -->
 		<mapping class="com.lodenrogue.socialnetwork.model.Post" />
 		<mapping class="com.lodenrogue.socialnetwork.model.Comment" />
-		<!-- <mapping class="com.lodenrogue.socialnetwork.model.FriendRequest" 
-			/> -->
+		<mapping class="com.lodenrogue.socialnetwork.model.FriendRequest" />
 		<mapping class="com.lodenrogue.socialnetwork.model.Like" />
 
 	</session-factory>

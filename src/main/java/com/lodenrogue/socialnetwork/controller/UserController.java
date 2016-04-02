@@ -58,6 +58,7 @@ public class UserController {
 			return new ResponseEntity<Object>(new MissingFieldsError(missingFields), HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 		else {
+			user = new UserFacade().create(user);
 			user.add(createLinks(user));
 			return new ResponseEntity<Object>(user, HttpStatus.CREATED);
 		}

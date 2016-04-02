@@ -20,10 +20,10 @@ public class FriendRequest extends ResourceSupport {
 	private long entityId;
 
 	@Column(name = "target_id")
-	private long userTargetId;
+	private long targetUserId;
 
-	@Column(name = "requesting_id")
-	private long userRequestingId;
+	@Column(name = "requester_id")
+	private long requesterUserId;
 
 	public FriendRequest() {
 	}
@@ -36,19 +36,19 @@ public class FriendRequest extends ResourceSupport {
 		this.entityId = entityId;
 	}
 
-	public long getUserTargetId() {
-		return userTargetId;
+	public long getTargetUserId() {
+		return targetUserId;
 	}
 
-	public void setUserTargetId(long userTargetId) {
-		this.userTargetId = userTargetId;
+	public void setTargetUserId(long targetUserId) {
+		this.targetUserId = targetUserId;
 	}
 
-	public long getUserRequestingId() {
-		return userRequestingId;
+	public long getRequesterUserId() {
+		return requesterUserId;
 	}
 
-	public void setUserRequestingId(long userRequestingId) {
-		this.userRequestingId = userRequestingId;
+	public void setRequesterUserId(long requesterUserId) {
+		this.requesterUserId = requesterUserId;
 	}
 }
