@@ -27,6 +27,9 @@ import com.lodenrogue.socialnetwork.service.LikeFacade;
 import com.lodenrogue.socialnetwork.service.PostFacade;
 import com.lodenrogue.socialnetwork.service.UserFacade;
 
+import io.swagger.annotations.Api;
+
+@Api(value = "User")
 @RestController
 @RequestMapping(path = "/api/v1")
 public class UserController {

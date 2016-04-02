@@ -19,6 +19,9 @@ import com.lodenrogue.socialnetwork.error.ErrorMessage;
 import com.lodenrogue.socialnetwork.model.Like;
 import com.lodenrogue.socialnetwork.service.LikeFacade;
 
+import io.swagger.annotations.Api;
+
+@Api(value = "Like")
 @RestController
 @RequestMapping(path = "/api/v1")
 public class LikeController {

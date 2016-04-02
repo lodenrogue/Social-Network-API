@@ -24,6 +24,9 @@ import com.lodenrogue.socialnetwork.model.Like;
 import com.lodenrogue.socialnetwork.service.CommentFacade;
 import com.lodenrogue.socialnetwork.service.LikeFacade;
 
+import io.swagger.annotations.Api;
+
+@Api(value = "Comment")
 @RestController
 @RequestMapping(path = "/api/v1")
 public class CommentController {

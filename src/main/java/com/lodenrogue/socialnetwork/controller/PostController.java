@@ -26,6 +26,9 @@ import com.lodenrogue.socialnetwork.service.CommentFacade;
 import com.lodenrogue.socialnetwork.service.LikeFacade;
 import com.lodenrogue.socialnetwork.service.PostFacade;
 
+import io.swagger.annotations.Api;
+
+@Api(value = "Post")
 @RestController
 @RequestMapping(path = "/api/v1")
 public class PostController {
