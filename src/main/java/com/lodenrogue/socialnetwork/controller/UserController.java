@@ -136,6 +136,11 @@ public class UserController {
 		if (getPosts(user.getEntityId()).getBody().size() > 0) {
 			links.add(linkTo(methodOn(UserController.class).getPosts(user.getEntityId())).withRel("posts"));
 		}
+
+		// Add friend requests link
+		if (getFriendRequests(user.getEntityId()).getBody().size() > 0) {
+			links.add(linkTo(methodOn(UserController.class).getFriendRequests(user.getEntityId())).withRel("friend-requests"));
+		}
 		return links;
 	}
 }
