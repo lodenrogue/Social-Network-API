@@ -21,6 +21,9 @@ import com.lodenrogue.socialnetwork.error.MissingFieldsError;
 import com.lodenrogue.socialnetwork.model.FriendRequest;
 import com.lodenrogue.socialnetwork.service.FriendRequestFacade;
 
+import io.swagger.annotations.Api;
+
+@Api(value = "Friend Request")
 @RestController
 @RequestMapping(path = "/api/v1")
 public class FriendRequestController {

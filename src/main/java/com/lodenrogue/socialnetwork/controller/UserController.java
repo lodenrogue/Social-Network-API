@@ -20,11 +20,13 @@ import com.lodenrogue.socialnetwork.error.ErrorMessage;
 import com.lodenrogue.socialnetwork.error.MissingFieldsError;
 import com.lodenrogue.socialnetwork.model.Comment;
 import com.lodenrogue.socialnetwork.model.FriendRequest;
+import com.lodenrogue.socialnetwork.model.Friendship;
 import com.lodenrogue.socialnetwork.model.Like;
 import com.lodenrogue.socialnetwork.model.Post;
 import com.lodenrogue.socialnetwork.model.User;
 import com.lodenrogue.socialnetwork.service.CommentFacade;
 import com.lodenrogue.socialnetwork.service.FriendRequestFacade;
+import com.lodenrogue.socialnetwork.service.FriendshipFacade;
 import com.lodenrogue.socialnetwork.service.LikeFacade;
 import com.lodenrogue.socialnetwork.service.PostFacade;
 import com.lodenrogue.socialnetwork.service.UserFacade;
@@ -93,6 +95,15 @@ public class UserController {
 		return new ResponseEntity<List<FriendRequest>>(requests, HttpStatus.OK);
 	}
 
+	@RequestMapping(path = "/users/{userId}/friendships", method = RequestMethod.GET)
+	public HttpEntity<List<Friendship>> getFriendships(@PathVariable long userId) {
+		List<Friendship> friendships = new FriendshipFacade().findAllByUser(userId);
+		for (Friendship f : friendships) {
+			f.add(new FriendshipController().createLinks(f));
+		}
+		return new ResponseEntity<List<Friendship>>(friendships, HttpStatus.OK);
+	}
+
 	@RequestMapping(path = "/users/{id}", method = RequestMethod.DELETE)
 	public HttpEntity<Object> deleteUser(@PathVariable long id) {
 		// Delete posts
@@ -123,6 +134,12 @@ public class UserController {
 			new FriendRequestController().deleteFriendRequest(r.getEntityId());
 		}
 
+		// Delete friendships
+		List<Friendship> friendships = getFriendships(id).getBody();
+		for (Friendship f : friendships) {
+			new FriendshipController().deleteFriendship(f.getEntityId());
+		}
+
 		// Delete user
 		new UserFacade().delete(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
@@ -140,6 +157,11 @@ public class UserController {
 		// Add friend requests link
 		if (getFriendRequests(user.getEntityId()).getBody().size() > 0) {
 			links.add(linkTo(methodOn(UserController.class).getFriendRequests(user.getEntityId())).withRel("friend-requests"));
+		}
+
+		// Add friendships link
+		if (getFriendships(user.getEntityId()).getBody().size() > 0) {
+			links.add(linkTo(methodOn(UserController.class).getFriendships(user.getEntityId())).withRel("friendships"));
 		}
 		return links;
 	}
