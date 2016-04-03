@@ -1,4 +1,4 @@
-package com.lodenrogue.socialnetwork;
+package com.lodenrogue.socialnetwork.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
