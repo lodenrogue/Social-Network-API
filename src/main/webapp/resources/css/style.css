@@ -1,0 +1,46 @@
+.button {
+    background: #add8e6;
+    border: 0px;
+    border-radius: 3px;
+    color: #555555;
+}
+
+.form-info{
+	font-size: .8em;
+	margin-top: .2em;
+}
+
+#password-info {
+	margin-bottom: .5em;
+}
+
+#sign-up-form, #log-in-form {
+    width: 14em;
+    margin: auto;
+    margin-top: 4em;
+}
+
+#sign-up-form h2, #log-in-form h2 {
+    text-align: left;
+    color: #555555;
+    margin-bottom: -.15em;
+}
+
+#sign-up-form input, #log-in-form input {
+    height: 3em;
+    width: 15em;
+    margin-top: 1.2em;
+}
+
+#sign-up-form .input-box, #log-in-form .input-box {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    border-radius: 1px;
+    border: 1px solid #dddddd;
+}
+
+#have-account, #need-account {
+    margin-top: 1.2em;
+    font-size: .8em;
+    margin-bottom: -0.5em;
+}
