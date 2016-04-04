@@ -1,4 +1,4 @@
-package com.lodenrogue.socialnetwork.controller.web;
+package com.lodenrogue.socialnetwork;
 
 import java.text.DateFormat;
 import java.util.Date;
