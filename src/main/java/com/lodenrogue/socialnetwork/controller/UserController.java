@@ -58,9 +58,17 @@ public class UserController {
 		if (user.getLastName() == null) missingFields.add("lastName");
 		if (user.getEmail() == null) missingFields.add("email");
 
+		// Check missing fields
 		if (missingFields.size() > 0) {
 			return new ResponseEntity<Object>(new MissingFieldsError(missingFields), HttpStatus.UNPROCESSABLE_ENTITY);
 		}
+
+		// Check if email already exists in database
+		else if (new UserFacade().findByEmail(user.getEmail()) != null) {
+			return new ResponseEntity<Object>(new ErrorMessage("User with that email already exists"), HttpStatus.CONFLICT);
+		}
+
+		// Create user
 		else {
 			user = new UserFacade().create(user);
 			user.add(createLinks(user));
