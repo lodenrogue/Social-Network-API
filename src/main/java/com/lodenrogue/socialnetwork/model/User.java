@@ -8,6 +8,7 @@ import javax.persistence.Table;
 
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -28,9 +29,9 @@ public class User extends ResourceSupport {
 	@Column(name = "email")
 	private String email;
 
-	/**
-	 * Default constructor
-	 */
+	@Column(name = "password")
+	private String password;
+
 	public User() {
 	}
 
@@ -64,5 +65,15 @@ public class User extends ResourceSupport {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	@JsonIgnore
+	public String getPassword() {
+		return password;
+	}
+
+	@JsonProperty(value = "password")
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }

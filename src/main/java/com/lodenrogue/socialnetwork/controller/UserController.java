@@ -24,6 +24,8 @@ import com.lodenrogue.socialnetwork.model.Friendship;
 import com.lodenrogue.socialnetwork.model.Like;
 import com.lodenrogue.socialnetwork.model.Post;
 import com.lodenrogue.socialnetwork.model.User;
+import com.lodenrogue.socialnetwork.security.PasswordStorage;
+import com.lodenrogue.socialnetwork.security.PasswordStorage.CannotPerformOperationException;
 import com.lodenrogue.socialnetwork.service.CommentFacade;
 import com.lodenrogue.socialnetwork.service.FriendRequestFacade;
 import com.lodenrogue.socialnetwork.service.FriendshipFacade;
@@ -38,6 +40,41 @@ import io.swagger.annotations.Api;
 @RequestMapping(path = "/api/v1")
 public class UserController {
 
+	@RequestMapping(path = "/users", method = RequestMethod.POST)
+	public HttpEntity<Object> createUser(@RequestBody User user) {
+	
+		List<String> missingFields = new ArrayList<String>();
+		if (user.getFirstName() == null) missingFields.add("firstName");
+		if (user.getLastName() == null) missingFields.add("lastName");
+		if (user.getEmail() == null) missingFields.add("email");
+		if (user.getPassword() == null) missingFields.add("password");
+	
+		// Check missing fields
+		if (missingFields.size() > 0) {
+			return new ResponseEntity<Object>(new MissingFieldsError(missingFields), HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+	
+		// Check if email already exists in database
+		else if (new UserFacade().findByEmail(user.getEmail()) != null) {
+			return new ResponseEntity<Object>(new ErrorMessage("User with that email already exists"), HttpStatus.CONFLICT);
+		}
+	
+		// Create user
+		else {
+			try {
+				// Hash password
+				user.setPassword(PasswordStorage.createHash(user.getPassword()));
+			}
+			catch (CannotPerformOperationException e) {
+				e.printStackTrace();
+			}
+	
+			user = new UserFacade().create(user);
+			user.add(createLinks(user));
+			return new ResponseEntity<Object>(user, HttpStatus.CREATED);
+		}
+	}
+
 	@RequestMapping(path = "/users/{id}", method = RequestMethod.GET)
 	public HttpEntity<Object> getUser(@PathVariable long id) {
 		User user = new UserFacade().find(id);
@@ -45,34 +82,9 @@ public class UserController {
 			return new ResponseEntity<Object>(new ErrorMessage("No user with id " + id + " found"), HttpStatus.NOT_FOUND);
 		}
 		else {
+			user.setPassword("");
 			user.add(createLinks(user));
 			return new ResponseEntity<Object>(user, HttpStatus.OK);
-		}
-	}
-
-	@RequestMapping(path = "/users", method = RequestMethod.POST)
-	public HttpEntity<Object> createUser(@RequestBody User user) {
-
-		List<String> missingFields = new ArrayList<String>();
-		if (user.getFirstName() == null) missingFields.add("firstName");
-		if (user.getLastName() == null) missingFields.add("lastName");
-		if (user.getEmail() == null) missingFields.add("email");
-
-		// Check missing fields
-		if (missingFields.size() > 0) {
-			return new ResponseEntity<Object>(new MissingFieldsError(missingFields), HttpStatus.UNPROCESSABLE_ENTITY);
-		}
-
-		// Check if email already exists in database
-		else if (new UserFacade().findByEmail(user.getEmail()) != null) {
-			return new ResponseEntity<Object>(new ErrorMessage("User with that email already exists"), HttpStatus.CONFLICT);
-		}
-
-		// Create user
-		else {
-			user = new UserFacade().create(user);
-			user.add(createLinks(user));
-			return new ResponseEntity<Object>(user, HttpStatus.CREATED);
 		}
 	}
 
